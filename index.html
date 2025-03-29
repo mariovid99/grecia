@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mensajes Diarios</title>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1389.0.min.js"></script>
+    <!-- Carga AWS SDK -->
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        font-family: "Arial", sans-serif;
+        background-color: #f7f7f7;
+        color: #333;
+      }
+      .container {
+        display: flex;
+        flex: 1;
+        flex-direction: row;
+        justify-content: center;
+        margin-top: 50px;
+      }
+      .panel {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
+        cursor: pointer;
+        transition: transform 0.3s;
+        height: 200px;
+        margin: 0 20px;
+        border-radius: 10px;
+      }
+      .panel:hover {
+        transform: scale(1.05);
+      }
+      .grecia {
+        background-color: #ff80ab;
+      }
+      .mario {
+        background-color: #2196f3;
+      }
+      .hidden {
+        display: none;
+      }
+      .form-container {
+        text-align: center;
+        padding: 30px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+      input,
+      textarea,
+      button {
+        display: block;
+        width: 90%;
+        margin: 10px auto;
+        padding: 12px;
+        font-size: 1rem;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        outline: none;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .form-container h2 {
+        font-size: 1.5rem;
+        color: #333;
+        margin-bottom: 20px;
+      }
+      .form-container textarea {
+        height: 150px;
+        resize: none;
+        font-family: "Arial", sans-serif;
+      }
+      .form-container input[type="file"] {
+        padding: 8px;
+        background-color: #fafafa;
+      }
+      .form-container button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+      .redirect-button {
+        display: inline-block;
+        padding: 10px 20px;
+        margin-top: 20px;
+        background-color: #ff9800;
+        color: white;
+        font-size: 1rem;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+      }
+      .redirect-button:hover {
+        background-color: #f57c00;
+      }
+      #imagePreviewContainer {
+        margin: 15px auto;
+        display: none;
+      }
+      #imagePreview {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+      }
+      #removeImage {
+        margin-top: 5px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+      }
+      #removeImage:hover {
+        background-color: #d32f2f;
+      }
+      @media (max-width: 768px) {
+        .container {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="panel grecia" onclick="seleccionarUsuario('Grecia')">
+        Grecia
+      </div>
+      <div class="panel mario" onclick="seleccionarUsuario('Mario')">Mario</div>
+    </div>
+
+    <div id="formulario" class="hidden form-container">
+      <h2 id="bienvenida"></h2>
+      <textarea id="mensaje" placeholder="Escribe tu mensaje..."></textarea>
+      <input type="file" id="imagen" accept="image/*" />
+      <div id="imagePreviewContainer">
+        <img id="imagePreview" src="#" alt="Vista previa de la imagen" />
+        <button id="removeImage" onclick="removeImagePreview()">
+          Quitar imagen
+        </button>
+      </div>
+      <button id="submitButton" onclick="guardarDatos()">Subir</button>
+      <a id="redirectButton" class="redirect-button" href="#"
+        >Ver Tu Mensaje del Dia</a
+      >
+    </div>
+
+    <script>
+      // Configuración de AWS S3
+
+      const s3 = new AWS.S3();
+      let usuarioSeleccionado = "";
+
+      // Función para seleccionar usuario
+      window.seleccionarUsuario = (usuario) => {
+        usuarioSeleccionado = usuario;
+        document.querySelector(".container").style.display = "none";
+        document.getElementById("formulario").classList.remove("hidden");
+        document.getElementById(
+          "bienvenida"
+        ).innerText = `Hola, ${usuarioSeleccionado}!`;
+
+        // Ajustar el enlace de redirección
+        const redirectButton = document.getElementById("redirectButton");
+        if (usuarioSeleccionado === "Grecia") {
+          redirectButton.href = "Grecia.html";
+        } else if (usuarioSeleccionado === "Mario") {
+          redirectButton.href = "Mario.html";
+        }
+      };
+
+      // Vista previa de la imagen
+      document
+        .getElementById("imagen")
+        .addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+              const preview = document.getElementById("imagePreview");
+              preview.src = event.target.result;
+              document.getElementById("imagePreviewContainer").style.display =
+                "block";
+            };
+
+            reader.readAsDataURL(file);
+          }
+        });
+
+      // Función para quitar la vista previa
+      window.removeImagePreview = function () {
+        document.getElementById("imagen").value = "";
+        document.getElementById("imagePreviewContainer").style.display = "none";
+      };
+
+      // Validar campos antes de enviar
+      function validarCampos() {
+        const mensaje = document.getElementById("mensaje").value.trim();
+        const archivo = document.getElementById("imagen").files[0];
+        const submitButton = document.getElementById("submitButton");
+
+        // Habilitar/deshabilitar botón según validación
+        submitButton.disabled = !(mensaje.length > 0 || archivo);
+
+        return mensaje.length > 0 || archivo;
+      }
+
+      // Escuchar cambios en los campos
+      document
+        .getElementById("mensaje")
+        .addEventListener("input", validarCampos);
+      document
+        .getElementById("imagen")
+        .addEventListener("change", validarCampos);
+
+      // Función para guardar los datos
+      window.guardarDatos = async () => {
+        if (!validarCampos()) {
+          alert("Por favor escribe un mensaje o selecciona una imagen");
+          return;
+        }
+
+        const mensaje = document.getElementById("mensaje").value;
+        const archivo = document.getElementById("imagen").files[0];
+
+        try {
+          const submitButton = document.getElementById("submitButton");
+          submitButton.disabled = true;
+          submitButton.textContent = "Subiendo...";
+
+          // 1. Subir imagen (si existe)
+          let imagenURL = "";
+          if (archivo) {
+            const formData = new FormData();
+            formData.append("imagen", archivo);
+            formData.append("usuario", usuarioSeleccionado);
+
+            const responseImg = await fetch(
+              "https://s3-proxy.mariovida99.workers.dev/",
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
+
+            if (!responseImg.ok) throw new Error("Error al subir imagen");
+            const dataImg = await responseImg.json();
+            imagenURL = dataImg.url;
+          }
+
+          // 2. Guardar mensaje
+          const responseMsg = await fetch(
+            "https://s3-proxy.mariovida99.workers.dev/",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                usuario: usuarioSeleccionado,
+                mensaje: mensaje,
+                imagen: imagenURL,
+              }),
+            }
+          );
+
+          if (!responseMsg.ok) throw new Error("Error al guardar mensaje");
+
+          alert("Mensaje enviado correctamente!");
+          document.getElementById("mensaje").value = "";
+          document.getElementById("imagen").value = "";
+          document.getElementById("imagePreviewContainer").style.display =
+            "none";
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Error al enviar: " + error.message);
+        } finally {
+          submitButton.textContent = "Subir";
+          submitButton.disabled = false;
+        }
+      };
+
+      // Validar campos al cargar la página
+      document.addEventListener("DOMContentLoaded", function () {
+        validarCampos();
+      });
+    </script>
+  </body>
+</html>

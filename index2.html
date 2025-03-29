@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Blog de Grecia</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f9f9f9;
+      font-family: Arial, sans-serif;
+    }
+
+    .login-container {
+      text-align: center;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-image {
+      width: 250px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    .password-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #password-input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    #login-button {
+      padding: 10px 20px;
+      background-color: #ff6f61;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #login-button:hover {
+      background-color: #ff4a3d;
+    }
+
+    .hint-text {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+  <body>
+    <div class="login-container">
+      <div class="cartita-link-container">
+        <p>
+          Para acceder a tu cartita favorita, haz click
+          <a href="cartita.html">aquí</a>.
+        </p>
+        <p>Jueguito mamalón <a href="juego.html">aquí</a></p>
+      </div>
+      <!-- Imagen de login -->
+      <img src="password.PNG" alt="Login Image" class="login-image" />
+
+      <!-- Campo de contraseña -->
+      <div class="password-container">
+        <input
+          type="text"
+          id="password-input"
+          placeholder="Ingresa la contraseña"
+        />
+        <button id="login-button">Entrar</button>
+      </div>
+
+      <!-- Pista -->
+      <p id="hint" class="hint-text"></p>
+    </div>
+
+    <script>
+      // Función para cargar la contraseña y la pista desde archivos .txt
+      async function loadPasswordAndHint() {
+        try {
+          const passwordResponse = await fetch("password.txt");
+          const hintResponse = await fetch("hint.txt");
+
+          if (!passwordResponse.ok || !hintResponse.ok) {
+            throw new Error("Error al cargar los archivos");
+          }
+
+          const password = await passwordResponse.text();
+          const hint = await hintResponse.text();
+
+          return {
+            password: password.trim().toLowerCase(),
+            hint: hint.trim(),
+          };
+        } catch (error) {
+          console.error("Error:", error);
+          return { password: "", hint: "" };
+        }
+      }
+
+      // Función para validar la contraseña
+      async function validatePassword() {
+        const passwordInput = document
+          .getElementById("password-input")
+          .value.toLowerCase()
+          .trim();
+        const { password, hint } = await loadPasswordAndHint();
+        const loginImage = document.querySelector(".login-image"); // Selecciona la imagen de login
+
+        if (passwordInput === password) {
+          window.location.href = "blog.html"; // Redirigir a la página principal
+        } else {
+          loginImage.src = "Incorrect.png"; // Cambiar la imagen a "incorrect.png"
+        }
+      }
+
+      // Cargar la pista al iniciar la página
+      async function loadHint() {
+        const { hint } = await loadPasswordAndHint();
+        document.getElementById("hint").textContent = `Pista: ${hint}`;
+      }
+
+      // Evento para el botón de login
+      document
+        .getElementById("login-button")
+        .addEventListener("click", validatePassword);
+
+      // Cargar la pista al cargar la página
+      window.onload = loadHint;
+    </script>
+  </body>
+</html>
