@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vales para Grecia</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      h1 {
+        color: #ff6b81;
+        text-align: center;
+        margin: 20px 0;
+        font-size: 2.2rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      .envelopes-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 20px;
+        width: 100%;
+        max-width: 1200px;
+      }
+
+      .envelope-wrapper {
+        perspective: 1000px;
+        width: 400px;
+        height: 250px;
+        position: relative;
+        cursor: pointer;
+      }
+
+      .envelope {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.7s ease;
+      }
+
+      .envelope.open {
+        transform: rotateX(180deg);
+      }
+
+      .envelope-front,
+      .envelope-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+      }
+
+      .envelope-front {
+        background: #ff6b81;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        z-index: 2;
+        transform: rotateX(0deg);
+      }
+
+      .envelope-front::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        width: 0;
+        height: 0;
+        border-left: 140px solid transparent;
+        border-right: 140px solid transparent;
+        border-top: 100px solid #ff4757;
+        transform-origin: top;
+        transform: rotateX(0deg);
+        transition: all 0.7s ease;
+        z-index: 3;
+      }
+
+      .envelope.open .envelope-front::before {
+        transform: rotateX(180deg);
+      }
+
+      .envelope-front span {
+        position: absolute;
+        bottom: 20px;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: bold;
+        z-index: 4;
+      }
+
+      .envelope-back {
+        background: white;
+        border-radius: 8px;
+        transform: rotateX(180deg);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        z-index: 1;
+      }
+
+      .voucher {
+        text-align: center;
+        width: 100%;
+      }
+
+      .voucher h3 {
+        color: #ff6b81;
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+      }
+
+      .voucher p {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+        line-height: 1.5;
+      }
+
+      .voucher .instructions {
+        font-size: 0.9rem;
+        color: #666;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 15px;
+        border: 1px dashed #ddd;
+      }
+
+      @media (max-width: 768px) {
+        .envelope-wrapper {
+          width: 250px;
+          height: 180px;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+        }
+
+        .voucher h3 {
+          font-size: 1.3rem;
+        }
+
+        .voucher p {
+          font-size: 1rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .envelopes-container {
+          gap: 20px;
+        }
+
+        .envelope-wrapper {
+          width: 100%;
+          max-width: 350px;
+          height: 180px;
+        }
+
+        h1 {
+          font-size: 1.6rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Vales para Grecia Rata Arribista ❤️</h1>
+    <h2>¡Solo aplica uno a la semana!</h2>
+
+    <div class="envelopes-container">
+      <!-- Sobre 1 -->
+      <div class="envelope-wrapper">
+        <div class="envelope">
+          <div class="envelope-front">
+            <span>Ábreme</span>
+          </div>
+          <div class="envelope-back">
+            <div class="voucher">
+              <h3>Vale por un Masaje</h3>
+              <p>
+                Canjeable por un relajante masaje de 30 minutos cuando lo
+                desees.
+              </p>
+              <div class="instructions">
+                Para canjearlo: Tómale captura de pantalla y envíalo por
+                WhatsApp
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sobre 2 -->
+      <div class="envelope-wrapper">
+        <div class="envelope">
+          <div class="envelope-front">
+            <span>Ábreme</span>
+          </div>
+          <div class="envelope-back">
+            <div class="voucher">
+              <h3>Vale por una Cena</h3>
+              <p>Canjeable por una cena en el restaurante que prefieras.</p>
+              <div class="instructions">
+                Para canjearlo: Tómale captura de pantalla y envíalo por
+                WhatsApp
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sobre 3 -->
+      <div class="envelope-wrapper">
+        <div class="envelope">
+          <div class="envelope-front">
+            <span>Ábreme</span>
+          </div>
+          <div class="envelope-back">
+            <div class="voucher">
+              <h3>Vale por una pregunta que debo responder ahuevo</h3>
+              <p>
+                Preguntame lo que quieras, debo responderte ahuevo con la
+                verdad.
+              </p>
+              <div class="instructions">
+                Para canjearlo: Tómale captura de pantalla y envíalo por
+                WhatsApp
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Sobre 4 -->
+      <div class="envelope-wrapper">
+        <div class="envelope">
+          <div class="envelope-front">
+            <span>Ábreme</span>
+          </div>
+          <div class="envelope-back">
+            <div class="voucher">
+              <h3>Vale por hacer lo que quieras</h3>
+              <p>Puedes pedirme lo que sea y lo haré.</p>
+              <div class="instructions">
+                Para canjearlo: Tómale captura de pantalla y envíalo por
+                WhatsApp
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.querySelectorAll(".envelope-wrapper").forEach((wrapper) => {
+        wrapper.addEventListener("click", function () {
+          // Cerrar cualquier sobre abierto primero
+          document.querySelectorAll(".envelope").forEach((env) => {
+            if (
+              env !== this.querySelector(".envelope") &&
+              env.classList.contains("open")
+            ) {
+              env.classList.remove("open");
+            }
+          });
+
+          // Abrir/cerrar el sobre clickeado
+          this.querySelector(".envelope").classList.toggle("open");
+        });
+      });
+    </script>
+  </body>
+</html>
