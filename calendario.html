@@ -319,6 +319,12 @@
         padding: 5px 15px;
       }
 
+      .mood-image {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+      }
+
       @media (max-width: 600px) {
         .day-number {
           font-size: 1rem;
@@ -369,15 +375,21 @@
         <h2>¿Cómo resumirías tu día?</h2>
         <div class="options-container">
           <div class="option" data-status="bad">
-            <div class="option-icon bad">😞</div>
+            <div class="option-icon bad">
+              <img src="bad.png" alt="Mal día" class="mood-image" />
+            </div>
             <div class="option-text">Mal día</div>
           </div>
           <div class="option" data-status="neutral">
-            <div class="option-icon neutral">😊</div>
+            <div class="option-icon neutral">
+              <img src="neutral.png" alt="Bien" class="mood-image" />
+            </div>
             <div class="option-text">Bien</div>
           </div>
           <div class="option" data-status="good">
-            <div class="option-icon good">😍</div>
+            <div class="option-icon good">
+              <img src="good.png" alt="¡Excelente!" class="mood-image" />
+            </div>
             <div class="option-text">¡Excelente!</div>
           </div>
         </div>
@@ -403,6 +415,9 @@
 
       // Agrega estas constantes al inicio de tu JS
       const AWS_API_URL = "https://s3-proxy.mariovida99.workers.dev/"; // Reemplaza con tu URL de Cloudflare Worker
+      const messageUrl =
+        "https://meetbuyersapp.s3.us-east-2.amazonaws.com/diary-data.json";
+      console.log(messageUrl);
       const BUCKET_NAME = "meetbuyersapp"; // Mismo bucket que usas actualmente
       const JSON_FILE_NAME = "diary-data.json";
 
@@ -635,21 +650,46 @@
 
         const dateStr = formatDate(selectedDate);
 
-        // Actualizar datos localmente
-        if (!diaryData[dateStr]) {
-          diaryData[dateStr] = {};
+        // Crear una COPIA del estado actual para evitar mutaciones directas
+        const updatedData = { ...diaryData };
+
+        // Inicializar la entrada para esta fecha si no existe
+        if (!updatedData[dateStr]) {
+          updatedData[dateStr] = {};
         }
 
-        diaryData[dateStr][currentUser] = selectedStatus;
+        // Actualizar SOLO el estado del usuario actual, manteniendo los demás
+        updatedData[dateStr][currentUser] = selectedStatus;
 
         // Guardar en AWS
-        const success = await saveDiaryData(diaryData);
+        try {
+          const response = await fetch(AWS_API_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              action: "update-diary",
+              data: updatedData, // Enviamos los datos completos actualizados
+              fileName: JSON_FILE_NAME,
+              bucket: BUCKET_NAME,
+            }),
+          });
 
-        if (success) {
-          // Cerrar modal y actualizar calendario
+          if (!response.ok)
+            throw new Error("Error en la respuesta del servidor");
+
+          const result = await response.json();
+          console.log("Datos guardados:", result);
+
+          // Actualizar los datos locales SOLO si el guardado fue exitoso
+          diaryData = updatedData;
+
+          // Actualizar la UI
           dayModal.style.display = "none";
           renderCalendar();
-        } else {
+        } catch (error) {
+          console.error("Error guardando datos:", error);
           alert("Hubo un error al guardar. Intenta nuevamente.");
         }
       }
@@ -678,20 +718,32 @@
 
       // Función para cargar los datos desde AWS
       async function loadDiaryData() {
-        try {
-          const response = await fetch(`${AWS_API_URL}/get-data`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
+        const jsonUrl =
+          "https://meetbuyersapp.s3.us-east-2.amazonaws.com/diary-data.json";
 
-          if (!response.ok) throw new Error("Error al cargar datos");
+        try {
+          const response = await fetch(jsonUrl);
+          if (!response.ok) {
+            console.log(
+              "No se pudo cargar el JSON, iniciando con datos vacíos"
+            );
+            return {};
+          }
 
           const data = await response.json();
-          return data || {};
+
+          // Validar el formato básico del contenido
+          if (typeof data !== "object" || data === null) {
+            console.warn(
+              "Datos inválidos recibidos, iniciando con objeto vacío"
+            );
+            return {};
+          }
+
+          console.log("Datos cargados correctamente desde S3:", data);
+          return data;
         } catch (error) {
-          console.error("Error cargando datos:", error);
+          console.error("Error al cargar los datos desde S3:", error);
           return {};
         }
       }
