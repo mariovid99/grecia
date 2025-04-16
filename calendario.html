@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nuestro Diario Emocional</title>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1389.0.min.js"></script>
     <style>
       :root {
         --primary-color: #ff6b81;
@@ -401,7 +402,7 @@
       };
 
       // Agrega estas constantes al inicio de tu JS
-      const AWS_API_URL = "https://tu-worker.cloudflare.workers.dev"; // Reemplaza con tu URL de Cloudflare Worker
+      const AWS_API_URL = "https://s3-proxy.mariovida99.workers.dev/"; // Reemplaza con tu URL de Cloudflare Worker
       const BUCKET_NAME = "meetbuyersapp"; // Mismo bucket que usas actualmente
       const JSON_FILE_NAME = "diary-data.json";
 
