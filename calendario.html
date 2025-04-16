@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nuestro Diario Emocional</title>
+    <style>
+      :root {
+        --primary-color: #ff6b81;
+        --secondary-color: #70a1ff;
+        --good-color: #7bed9f;
+        --neutral-color: #ffa502;
+        --bad-color: #ff6b81;
+        --text-color: #2f3542;
+        --light-bg: #f1f2f6;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: var(--light-bg);
+        color: var(--text-color);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 30px;
+        position: relative;
+      }
+
+      h1 {
+        color: var(--primary-color);
+        margin-bottom: 10px;
+      }
+
+      .user-indicator {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: bold;
+      }
+
+      .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        margin-bottom: 30px;
+      }
+
+      .day-header {
+        text-align: center;
+        font-weight: bold;
+        padding: 10px 0;
+        color: var(--primary-color);
+      }
+
+      .day {
+        aspect-ratio: 1;
+        background-color: white;
+        border: 2px solid #dfe4ea;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .day:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .day-number {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .day.today {
+        border-color: var(--primary-color);
+        background-color: rgba(255, 107, 129, 0.1);
+      }
+
+      .day.yesterday {
+        border-color: var(--secondary-color);
+        background-color: rgba(112, 161, 255, 0.1);
+      }
+
+      .day.past {
+        opacity: 0.6;
+      }
+
+      .day.future {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+
+      /* Por esto */
+      .day-status {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        margin-top: 5px;
+      }
+
+      .user-status {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .user-marker {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 0.7rem;
+        font-weight: bold;
+        color: white;
+      }
+
+      .status-icon {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+      }
+
+      .user-marker.g {
+        background-color: var(--primary-color);
+      }
+
+      .user-marker.m {
+        background-color: var(--secondary-color);
+      }
+
+      .status-icon {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        margin-top: 2px;
+      }
+
+      .status-icon.good {
+        background-color: var(--good-color);
+      }
+
+      .status-icon.neutral {
+        background-color: var(--neutral-color);
+      }
+
+      .status-icon.bad {
+        background-color: var(--bad-color);
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 100;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+        position: relative;
+        animation: modalFadeIn 0.3s ease;
+      }
+
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .close-modal {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text-color);
+      }
+
+      .modal h2 {
+        margin-bottom: 20px;
+        color: var(--primary-color);
+      }
+
+      .options-container {
+        display: flex;
+        justify-content: space-around;
+        margin: 30px 0;
+      }
+
+      .option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+      }
+
+      .option:hover {
+        background-color: var(--light-bg);
+      }
+
+      .option-icon {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 10px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;
+        color: white;
+      }
+
+      .option-icon.bad {
+        background-color: var(--bad-color);
+      }
+
+      .option-icon.neutral {
+        background-color: var(--neutral-color);
+      }
+
+      .option-icon.good {
+        background-color: var(--good-color);
+      }
+
+      .option-text {
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+
+      .save-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+      }
+
+      .save-btn:hover {
+        background-color: #ff4757;
+        transform: translateY(-2px);
+      }
+
+      .month-selector {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .month-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: var(--text-color);
+      }
+
+      .nav-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--primary-color);
+        padding: 5px 15px;
+      }
+
+      @media (max-width: 600px) {
+        .day-number {
+          font-size: 1rem;
+        }
+
+        .user-marker {
+          width: 16px;
+          height: 16px;
+          font-size: 0.6rem;
+        }
+
+        .status-icon {
+          width: 12px;
+          height: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Nuestro Diario Emocional</h1>
+        <div class="user-indicator" id="userIndicator">Grecia</div>
+      </header>
+
+      <div class="month-selector">
+        <button class="nav-btn" id="prevMonth">&lt;</button>
+        <div class="month-title" id="monthYear">Junio 2023</div>
+        <button class="nav-btn" id="nextMonth">&gt;</button>
+      </div>
+
+      <div class="calendar" id="calendar">
+        <div class="day-header">Dom</div>
+        <div class="day-header">Lun</div>
+        <div class="day-header">Mar</div>
+        <div class="day-header">Mié</div>
+        <div class="day-header">Jue</div>
+        <div class="day-header">Vie</div>
+        <div class="day-header">Sáb</div>
+
+        <!-- Los días se generarán dinámicamente con JavaScript -->
+      </div>
+    </div>
+
+    <div class="modal" id="dayModal">
+      <div class="modal-content">
+        <span class="close-modal" id="closeModal">&times;</span>
+        <h2>¿Cómo resumirías tu día?</h2>
+        <div class="options-container">
+          <div class="option" data-status="bad">
+            <div class="option-icon bad">😞</div>
+            <div class="option-text">Mal día</div>
+          </div>
+          <div class="option" data-status="neutral">
+            <div class="option-icon neutral">😊</div>
+            <div class="option-text">Bien</div>
+          </div>
+          <div class="option" data-status="good">
+            <div class="option-icon good">😍</div>
+            <div class="option-text">¡Excelente!</div>
+          </div>
+        </div>
+        <button class="save-btn" id="saveDay">Guardar</button>
+      </div>
+    </div>
+
+    <script>
+      // Datos de ejemplo (esto vendría de tu JSON en AWS)
+      let diaryData = {
+        "2023-06-15": {
+          G: "good",
+          M: "neutral",
+        },
+        "2023-06-16": {
+          G: "bad",
+          M: "good",
+        },
+        "2023-06-17": {
+          G: "neutral",
+        },
+      };
+
+      // Agrega estas constantes al inicio de tu JS
+      const AWS_API_URL = "https://tu-worker.cloudflare.workers.dev"; // Reemplaza con tu URL de Cloudflare Worker
+      const BUCKET_NAME = "meetbuyersapp"; // Mismo bucket que usas actualmente
+      const JSON_FILE_NAME = "diary-data.json";
+
+      // Configuración inicial
+      let currentUser = "G"; // G para Grecia, M para Mario
+      let currentDate = new Date();
+      let selectedDate = null;
+      let selectedStatus = null;
+
+      // Elementos del DOM
+      const userIndicator = document.getElementById("userIndicator");
+      const calendarEl = document.getElementById("calendar");
+      const monthYearEl = document.getElementById("monthYear");
+      const prevMonthBtn = document.getElementById("prevMonth");
+      const nextMonthBtn = document.getElementById("nextMonth");
+      const dayModal = document.getElementById("dayModal");
+      const closeModal = document.getElementById("closeModal");
+      const saveDayBtn = document.getElementById("saveDay");
+      const options = document.querySelectorAll(".option");
+
+      // Inicializar la aplicación
+      async function init() {
+        diaryData = await loadDiaryData();
+        updateUserIndicator();
+        renderCalendar();
+        setupEventListeners();
+      }
+
+      // Actualizar el indicador de usuario
+      function updateUserIndicator() {
+        userIndicator.textContent = currentUser === "G" ? "Grecia" : "Mario";
+        userIndicator.style.backgroundColor =
+          currentUser === "G"
+            ? "var(--primary-color)"
+            : "var(--secondary-color)";
+      }
+
+      // Cambiar de usuario (simulando cambio de vista)
+      function toggleUser() {
+        currentUser = currentUser === "G" ? "M" : "G";
+        updateUserIndicator();
+        renderCalendar();
+      }
+
+      // Renderizar el calendario
+      function renderCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        // Configurar el título del mes/año
+        monthYearEl.textContent = new Date(year, month)
+          .toLocaleDateString("es-ES", {
+            month: "long",
+            year: "numeric",
+          })
+          .replace(/^\w/, (c) => c.toUpperCase());
+
+        // Obtener primer día del mes y último día del mes
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+
+        // Obtener días del mes anterior para completar la primera semana
+        const prevLastDay = new Date(year, month, 0).getDate();
+        const firstDayIndex = firstDay.getDay();
+
+        // Obtener días del próximo mes para completar la última semana
+        const lastDayIndex = lastDay.getDay();
+        const nextDays = 6 - lastDayIndex;
+
+        // Limpiar el calendario (excepto los headers)
+        while (calendarEl.children.length > 7) {
+          calendarEl.removeChild(calendarEl.lastChild);
+        }
+
+        // Añadir días del mes anterior
+        for (let i = firstDayIndex; i > 0; i--) {
+          const day = prevLastDay - i + 1;
+          const dayEl = createDayElement(day, "prev-month");
+          calendarEl.appendChild(dayEl);
+        }
+
+        // Añadir días del mes actual
+        for (let i = 1; i <= lastDay.getDate(); i++) {
+          const dayDate = new Date(year, month, i);
+          const dateStr = formatDate(dayDate);
+          const isToday = isSameDay(dayDate, new Date());
+          const isYesterday = isSameDay(dayDate, getYesterday());
+
+          let dayClass = "";
+          if (isToday) dayClass = "today";
+          else if (isYesterday) dayClass = "yesterday";
+          else if (dayDate < getYesterday()) dayClass = "past";
+          else if (dayDate > new Date()) dayClass = "future";
+
+          const dayEl = createDayElement(i, dayClass);
+
+          // Mostrar estados si existen
+          if (diaryData[dateStr]) {
+            const statusContainer = document.createElement("div");
+            statusContainer.className = "day-status";
+
+            if (diaryData[dateStr].G) {
+              const gMarker = createUserMarker("G", diaryData[dateStr].G);
+              statusContainer.appendChild(gMarker);
+            }
+
+            if (diaryData[dateStr].M) {
+              const mMarker = createUserMarker("M", diaryData[dateStr].M);
+              statusContainer.appendChild(mMarker);
+            }
+
+            dayEl.appendChild(statusContainer);
+          }
+
+          calendarEl.appendChild(dayEl);
+        }
+
+        // Añadir días del próximo mes
+        for (let i = 1; i <= nextDays; i++) {
+          const dayEl = createDayElement(i, "next-month");
+          calendarEl.appendChild(dayEl);
+        }
+      }
+
+      // Crear elemento de día
+      function createDayElement(dayNumber, className) {
+        const dayEl = document.createElement("div");
+        dayEl.className = `day ${className}`;
+
+        const dayNumberEl = document.createElement("div");
+        dayNumberEl.className = "day-number";
+        dayNumberEl.textContent = dayNumber;
+
+        dayEl.appendChild(dayNumberEl);
+
+        // Solo permitir clic en días pasados (hasta hoy)
+        if (
+          className === "today" ||
+          className === "yesterday" ||
+          className === "past"
+        ) {
+          dayEl.addEventListener("click", () => handleDayClick(dayNumber));
+        }
+
+        return dayEl;
+      }
+
+      // Crear marcador de usuario con estado
+      function createUserMarker(user, status) {
+        const marker = document.createElement("div");
+        marker.className = `user-marker ${user.toLowerCase()}`;
+        marker.textContent = user;
+
+        const statusIcon = document.createElement("div");
+        statusIcon.className = `status-icon ${status}`;
+
+        const container = document.createElement("div");
+        container.className = "user-status";
+        container.appendChild(marker);
+        container.appendChild(statusIcon);
+
+        return container;
+      }
+
+      // Manejar clic en día
+      function handleDayClick(dayNumber) {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        selectedDate = new Date(year, month, dayNumber);
+
+        // Verificar si es hoy o ayer
+        const today = new Date();
+        const yesterday = getYesterday();
+
+        if (
+          !isSameDay(selectedDate, today) &&
+          !isSameDay(selectedDate, yesterday)
+        ) {
+          alert("Solo puedes registrar días para hoy o ayer");
+          return;
+        }
+
+        // Mostrar modal
+        dayModal.style.display = "flex";
+        selectedStatus = null;
+      }
+
+      // Configurar event listeners
+      function setupEventListeners() {
+        // Cambiar mes
+        prevMonthBtn.addEventListener("click", () => {
+          currentDate.setMonth(currentDate.getMonth() - 1);
+          renderCalendar();
+        });
+
+        nextMonthBtn.addEventListener("click", () => {
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          renderCalendar();
+        });
+
+        // Cambiar usuario (simulando cambio de vista)
+        userIndicator.addEventListener("click", toggleUser);
+
+        // Cerrar modal
+        closeModal.addEventListener("click", () => {
+          dayModal.style.display = "none";
+        });
+
+        // Seleccionar opción de estado
+        options.forEach((option) => {
+          option.addEventListener("click", () => {
+            options.forEach(
+              (opt) => (opt.style.backgroundColor = "transparent")
+            );
+            option.style.backgroundColor = "var(--light-bg)";
+            selectedStatus = option.getAttribute("data-status");
+          });
+        });
+
+        // Guardar estado del día
+        saveDayBtn.addEventListener("click", saveDayStatus);
+      }
+
+      // Guardar el estado del día seleccionado
+      async function saveDayStatus() {
+        if (!selectedDate || !selectedStatus) {
+          alert("Por favor selecciona cómo estuvo tu día");
+          return;
+        }
+
+        const dateStr = formatDate(selectedDate);
+
+        // Actualizar datos localmente
+        if (!diaryData[dateStr]) {
+          diaryData[dateStr] = {};
+        }
+
+        diaryData[dateStr][currentUser] = selectedStatus;
+
+        // Guardar en AWS
+        const success = await saveDiaryData(diaryData);
+
+        if (success) {
+          // Cerrar modal y actualizar calendario
+          dayModal.style.display = "none";
+          renderCalendar();
+        } else {
+          alert("Hubo un error al guardar. Intenta nuevamente.");
+        }
+      }
+
+      // Funciones de utilidad
+      function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      function isSameDay(date1, date2) {
+        return (
+          date1.getFullYear() === date2.getFullYear() &&
+          date1.getMonth() === date2.getMonth() &&
+          date1.getDate() === date2.getDate()
+        );
+      }
+
+      function getYesterday() {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        return yesterday;
+      }
+
+      // Función para cargar los datos desde AWS
+      async function loadDiaryData() {
+        try {
+          const response = await fetch(`${AWS_API_URL}/get-data`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!response.ok) throw new Error("Error al cargar datos");
+
+          const data = await response.json();
+          return data || {};
+        } catch (error) {
+          console.error("Error cargando datos:", error);
+          return {};
+        }
+      }
+
+      // Función para guardar datos en AWS
+      async function saveDiaryData(data) {
+        try {
+          const response = await fetch(AWS_API_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              action: "update-diary",
+              data: data,
+              fileName: JSON_FILE_NAME,
+              bucket: BUCKET_NAME,
+            }),
+          });
+
+          if (!response.ok) throw new Error("Error al guardar datos");
+
+          const result = await response.json();
+          console.log("Datos guardados:", result);
+          return true;
+        } catch (error) {
+          console.error("Error guardando datos:", error);
+          return false;
+        }
+      }
+
+      // Iniciar la aplicación
+      init();
+    </script>
+  </body>
+</html>
