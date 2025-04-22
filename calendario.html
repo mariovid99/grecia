@@ -326,19 +326,32 @@
       }
 
       @media (max-width: 600px) {
+        .day-status {
+          display: flex;
+          justify-content: center;
+          width: 100%;
+          margin-top: 5px;
+        }
+
         .day-number {
           font-size: 0.5rem;
         }
 
         .user-marker {
-          width: 10px;
-          height: 10px;
-          font-size: 0.3rem;
+          width: 7px;
+          height: 7px;
+          font-size: 0.4rem;
         }
 
         .status-icon {
-          width: 4px;
-          height: 4px;
+          width: 8px;
+          height: 8px;
+        }
+
+        h1 {
+          color: var(--primary-color);
+          margin-bottom: 10px;
+          font-size: 20px;
         }
       }
     </style>
@@ -346,7 +359,7 @@
   <body>
     <div class="container">
       <header>
-        <h1>Nuestro Diario Emocional</h1>
+        <h1>Dia DLV o CM</h1>
         <div class="user-indicator" id="userIndicator">Grecia</div>
       </header>
 
