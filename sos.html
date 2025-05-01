@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Botón de Emergencia</title>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+      // Inicializa EmailJS con tu User ID
+      (function () {
+        emailjs.init("RQnEKohalUXT8Qkws"); // Reemplaza con tu User ID de EmailJS
+      })();
+    </script>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #0a0a1a;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        text-align: center;
+        background-image: radial-gradient(circle, #1a1a2e 0%, #0a0a1a 100%);
+      }
+
+      h1 {
+        color: #ff4444;
+        text-shadow: 0 0 10px #ff0000;
+        margin-bottom: 0;
+      }
+
+      h2 {
+        color: #aaaaaa;
+        font-weight: normal;
+        margin-top: 10px;
+        margin-bottom: 40px;
+        max-width: 80%;
+      }
+
+      .emergency-button {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(145deg, #ff0000, #cc0000);
+        border-radius: 50%;
+        border: none;
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        text-transform: uppercase;
+        cursor: pointer;
+        box-shadow: 0 0 20px #ff0000, inset 0 0 10px rgba(255, 0, 0, 0.5);
+        transition: all 0.3s ease;
+        outline: none;
+        overflow: hidden;
+      }
+
+      .emergency-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px #ff0000, inset 0 0 15px rgba(255, 0, 0, 0.7);
+      }
+
+      .emergency-button:active {
+        transform: scale(0.95);
+        box-shadow: 0 0 15px #ff0000, inset 0 0 20px rgba(255, 0, 0, 0.8);
+      }
+
+      .emergency-button::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        border-radius: 50%;
+        border: 2px dashed rgba(255, 255, 255, 0.3);
+        animation: rotate 20s linear infinite;
+      }
+
+      .emergency-button::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          transparent 40%,
+          rgba(255, 0, 0, 0.3) 100%
+        );
+      }
+
+      .button-text {
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 0 5px #000;
+      }
+
+      .button-lights {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+
+      .light {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.8);
+      }
+
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .status {
+        margin-top: 30px;
+        color: #aaaaaa;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Botón de Emergencia</h1>
+    <h2>
+      Si ocupas hablar con alguien o necesitas algo presiona este botón y yo te
+      hablo inmediatamente
+    </h2>
+
+    <button class="emergency-button" id="emergencyBtn">
+      <span class="button-text">SOS</span>
+      <div class="button-lights" id="buttonLights"></div>
+    </button>
+
+    <p class="status" id="statusMessage"></p>
+
+    <script>
+      // Configura las luces del botón
+      const buttonLights = document.getElementById("buttonLights");
+      const lightCount = 12;
+
+      for (let i = 0; i < lightCount; i++) {
+        const light = document.createElement("div");
+        light.className = "light";
+
+        // Posiciona las luces en un círculo
+        const angle = (i / lightCount) * 2 * Math.PI;
+        const radius = 85;
+        const x = 100 + radius * Math.cos(angle) - 4;
+        const y = 100 + radius * Math.sin(angle) - 4;
+
+        light.style.left = `${x}px`;
+        light.style.top = `${y}px`;
+
+        // Animación de parpadeo aleatorio
+        light.style.animation = `blink ${
+          1 + Math.random() * 2
+        }s infinite alternate`;
+
+        buttonLights.appendChild(light);
+      }
+
+      // Función para enviar el correo
+      document
+        .getElementById("emergencyBtn")
+        .addEventListener("click", function () {
+          const statusMessage = document.getElementById("statusMessage");
+          statusMessage.textContent = "Enviando alerta de emergencia...";
+
+          // Configura los parámetros del correo
+          const templateParams = {
+            to_name: "Tú", // Tu nombre
+            from_name: "Usuario del botón de emergencia",
+            message:
+              "¡Se ha presionado el botón de emergencia! Por favor contacta a esta persona lo antes posible.",
+            reply_to: "marioactfin@gmail.com", // Opcional: capturar el email del usuario si lo deseas
+          };
+
+          // Envía el correo usando EmailJS
+          emailjs
+            .send("service_n7mhofp", "template_yb47hxu", templateParams)
+            .then(
+              function (response) {
+                statusMessage.textContent =
+                  "¡Alerta enviada! Me pondré en contacto contigo lo antes posible.";
+                console.log("SUCCESS!", response.status, response.text);
+              },
+              function (error) {
+                statusMessage.textContent =
+                  "Error al enviar la alerta. Por favor intenta nuevamente o contactame por otro medio.";
+                console.log("FAILED...", error);
+              }
+            );
+        });
+    </script>
+  </body>
+</html>
