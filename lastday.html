@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    />
+    <title>Mi Recap - Últimos 100 Días</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --pastel-blue: #a7d2cb;
+        --pastel-pink: #f2d388;
+        --pastel-lavender: #c2b4d6;
+        --pastel-peach: #f9c5bd;
+        --pastel-green: #b5e7a0;
+        --pastel-mint: #d5e8d4;
+        --text-color: #5a5a5a;
+        --light-shadow: rgba(0, 0, 0, 0.1);
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(
+          135deg,
+          var(--pastel-mint),
+          var(--pastel-lavender)
+        );
+        color: var(--text-color);
+        min-height: 100vh;
+        padding: 20px 15px 80px;
+        overflow-x: hidden;
+      }
+
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        padding: 25px 0;
+        margin-bottom: 20px;
+        position: relative;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: #5a5a5a;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
+        background: linear-gradient(to right, #7b68ee, #ff6b6b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .subtitle {
+        font-size: 1.1rem;
+        font-weight: 300;
+        max-width: 90%;
+        margin: 0 auto;
+        line-height: 1.5;
+      }
+
+      .counter {
+        background-color: var(--pastel-pink);
+        border-radius: 20px;
+        padding: 8px 15px;
+        display: inline-block;
+        margin-top: 12px;
+        font-weight: 600;
+        box-shadow: 0 3px 8px var(--light-shadow);
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+        padding: 10px;
+      }
+
+      .image-container {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px var(--light-shadow);
+        aspect-ratio: 1/1;
+        background-color: var(--pastel-blue);
+        opacity: 0;
+        transform: translateY(20px);
+        transition: transform 0.4s ease, opacity 0.4s ease;
+        animation: fadeIn 0.6s forwards;
+        cursor: pointer;
+      }
+
+      .image-container:nth-child(2n) {
+        background-color: var(--pastel-lavender);
+      }
+
+      .image-container:nth-child(3n) {
+        background-color: var(--pastel-peach);
+      }
+
+      .image-container:nth-child(5n) {
+        background-color: var(--pastel-green);
+      }
+
+      .image-container.loaded {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+      }
+
+      .image-container:hover img {
+        transform: scale(1.05);
+      }
+
+      .image-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+        padding: 10px;
+        color: white;
+        font-size: 0.8rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .image-container:hover .image-overlay {
+        opacity: 1;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 30px;
+        font-size: 1.2rem;
+        color: var(--text-color);
+        display: none;
+      }
+
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+
+      .modal.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .modal-content {
+        max-width: 90%;
+        max-height: 90%;
+        position: relative;
+      }
+
+      .modal-img {
+        max-width: 100%;
+        max-height: 80vh;
+        border-radius: 8px;
+      }
+
+      .modal-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-caption {
+        color: white;
+        text-align: center;
+        margin-top: 10px;
+        font-size: 1.1rem;
+      }
+
+      .instructions {
+        background-color: rgba(255, 255, 255, 0.7);
+        border-radius: 16px;
+        padding: 20px;
+        margin: 25px auto;
+        max-width: 500px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .instructions h2 {
+        margin-bottom: 12px;
+        color: #6a5acd;
+      }
+
+      .instructions p {
+        margin-bottom: 8px;
+        line-height: 1.5;
+      }
+
+      footer {
+        text-align: center;
+        padding: 30px 0 15px;
+        font-size: 0.9rem;
+        color: var(--text-color);
+      }
+
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (min-width: 768px) {
+        .gallery {
+          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+          gap: 16px;
+        }
+
+        h1 {
+          font-size: 2.8rem;
+        }
+
+        .subtitle {
+          font-size: 1.2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Nuestros 100 Días</h1>
+        <p class="subtitle">Un recap de los ultimos 100 dias</p>
+        <div class="counter">101 momentos bonitos</div>
+      </header>
+
+      <div class="instructions">
+        <h2>Instrucciones</h2>
+        <p>Desliza hacia abajo para ver más recuerdos</p>
+        <p>Toca cualquier imagen para verla en grande</p>
+      </div>
+
+      <div class="gallery" id="gallery"></div>
+      <div class="loading" id="loading">Cargando más recuerdos...</div>
+
+      <footer>
+        <p>Hecho con ❤️ - Te amo Grecia</p>
+      </footer>
+    </div>
+
+    <div class="modal" id="imageModal">
+      <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <img class="modal-img" id="modalImage" src="" alt="Imagen ampliada" />
+        <div class="modal-caption" id="modalCaption"></div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const gallery = document.getElementById("gallery");
+        const loading = document.getElementById("loading");
+        const modal = document.getElementById("imageModal");
+        const modalImage = document.getElementById("modalImage");
+        const modalCaption = document.getElementById("modalCaption");
+        const closeModal = document.querySelector(".modal-close");
+
+        // Simula la carga de imágenes
+        let loadedImages = 0;
+        const totalImages = 101;
+        const imagesPerLoad = 20;
+        let isLoading = false;
+
+        // Función para verificar si una imagen existe
+        function checkImageExists(url, callback) {
+          const img = new Image();
+          img.onload = function () {
+            callback(true);
+          };
+          img.onerror = function () {
+            callback(false);
+          };
+          img.src = url;
+        }
+
+        // Función para cargar imágenes
+        function loadImages() {
+          if (isLoading) return;
+
+          isLoading = true;
+          loading.style.display = "block";
+
+          setTimeout(() => {
+            const startIndex = loadedImages + 1;
+            const endIndex = Math.min(
+              loadedImages + imagesPerLoad,
+              totalImages
+            );
+
+            let imagesLoaded = 0;
+            const imagesToLoad = endIndex - startIndex + 1;
+
+            for (let i = startIndex; i <= endIndex; i++) {
+              const imageNumber = i.toString().padStart(2, "0");
+              const extensions = ["jpg", "jpeg", "png"];
+              let found = false;
+
+              // Intentar con cada extensión
+              for (const ext of extensions) {
+                const imgSrc = `lastday/img_${imageNumber}.${ext}`;
+
+                checkImageExists(imgSrc, (exists) => {
+                  if (exists && !found) {
+                    found = true;
+                    createImageElement(i, imgSrc);
+                    imagesLoaded++;
+
+                    if (imagesLoaded >= imagesToLoad) {
+                      finishLoading(endIndex);
+                    }
+                  }
+
+                  // Si es el último intento y no se encontró
+                  if (ext === extensions[extensions.length - 1] && !found) {
+                    console.warn(`Imagen no encontrada: img_${imageNumber}`);
+                    imagesLoaded++;
+
+                    if (imagesLoaded >= imagesToLoad) {
+                      finishLoading(endIndex);
+                    }
+                  }
+                });
+              }
+            }
+          }, 300);
+        }
+
+        // Función para crear elementos de imagen
+        function createImageElement(index, imgSrc) {
+          const imageContainer = document.createElement("div");
+          imageContainer.className = "image-container";
+          imageContainer.dataset.index = index;
+
+          const img = document.createElement("img");
+          img.src = imgSrc;
+          img.alt = `Día ${index}`;
+          img.loading = "lazy";
+
+          const overlay = document.createElement("div");
+          overlay.className = "image-overlay";
+          overlay.textContent = `Día ${index}`;
+
+          imageContainer.appendChild(img);
+          imageContainer.appendChild(overlay);
+          gallery.appendChild(imageContainer);
+
+          // Animación de aparición
+          setTimeout(() => {
+            imageContainer.classList.add("loaded");
+          }, 100 + (index % 10) * 101);
+
+          // Evento para mostrar en modal
+          imageContainer.addEventListener("click", () => {
+            modalImage.src = imgSrc;
+            modalCaption.textContent = `Día ${index} de mi recap`;
+            modal.classList.add("active");
+            document.body.style.overflow = "hidden";
+          });
+        }
+
+        // Función para finalizar la carga
+        function finishLoading(endIndex) {
+          loadedImages = endIndex;
+          isLoading = false;
+          loading.style.display = "none";
+
+          if (loadedImages >= totalImages) {
+            loading.style.display = "none";
+          }
+        }
+
+        // Cargar imágenes iniciales
+        loadImages();
+
+        // Cerrar modal
+        closeModal.addEventListener("click", () => {
+          modal.classList.remove("active");
+          document.body.style.overflow = "auto";
+        });
+
+        // Cerrar modal al hacer clic fuera de la imagen
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) {
+            modal.classList.remove("active");
+            document.body.style.overflow = "auto";
+          }
+        });
+
+        // Cargar más imágenes al hacer scroll
+        window.addEventListener("scroll", () => {
+          const { scrollTop, scrollHeight, clientHeight } =
+            document.documentElement;
+
+          if (
+            scrollTop + clientHeight >= scrollHeight - 300 &&
+            loadedImages < totalImages &&
+            !isLoading
+          ) {
+            loadImages();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
